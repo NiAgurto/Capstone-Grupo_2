@@ -1,0 +1,19 @@
+# --- BASE DE DATOS (RDS) ---
+DB_HOST=taller-pepsi.cf6ooewwq8kb.us-east-2.rds.amazonaws.com
+DB_USER=admin
+DB_PASSWORD=Felizcapstone123-2025
+DB_NAME=taller_pepsi
+ 
+# --- SERVIDOR ---
+PORT=4000
+JWT_SECRET=un_secreto_muy_dificil_de_adivinar_12345
+FRONTEND_URL=https://d11d5li552qwyj.cloudfront.net
+# --- AWS S3 (Credenciales IAM) ---
+AWS_REGION=us-east-2
+AWS_ACCESS_KEY_ID=AKIAUX5OIDMLLZQKCO4B
+AWS_SECRET_ACCESS_KEY=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
+AWS_BUCKET_NAME=pepsi-taller-evidencias-2025
+ 
+# --- EMAIL (Opcional por ahora) ---
+EMAIL_USER=martilinaraneda@gmail.com
+EMAIL_PASS=mfxu yrpt epkc upmj
