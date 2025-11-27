@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Gestión de Taller - PepsiCo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar { transition: transform 0.3s ease-in-out; }
+        .view { display: none; }
+        .view.active { display: block; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Login View -->
+    <div id="login-view" class="flex items-center justify-center h-screen bg-slate-900">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm text-center">
+            <div class="flex justify-center mb-4">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.977l-.115.06m-2.299 3.854a6.959 6.959 0 01-4.507-2.305 6.959 6.959 0 01-2.305-4.507 6.959 6.959 0 012.305-4.507 6.959 6.959 0 014.507-2.305 6.959 6.959 0 014.507 2.305 6.959 6.959 0 012.305 4.507m-2.305 4.507l.114.06a6 6 0 003.86-.977l2.387-.477a2 2 0 011.022.547M12 18a6 6 0 100-12 6 6 0 000 12z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Plataforma Taller PepsiCo</h1>
+            <p class="text-gray-500 mb-6">Seleccione su rol para continuar</p>
+            <select id="role-selector" class="w-full p-2 border border-gray-300 rounded-md mb-4">
+                <option value="jefe-taller">Jefe de Taller</option>
+                <option value="mecanico">Mecánico de Flota</option>
+                <option value="guardia">Guardia de Acceso</option>
+                <option value="recepcionista">Recepcionista de Vehículos</option>
+                <option value="asistente-repuestos">Asistente de Repuestos</option>
+                <option value="coordinador-zona">Coordinador de Zona</option>
+                <option value="encargado-llaves">Encargado de Llaves</option>
+                <option value="admin">Administrador de Cuentas</option>
+            </select>
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200">Ingresar</button>
+        </div>
+    </div>
+
+    <!-- Main App View -->
+    <div id="app-view" class="flex h-screen overflow-hidden hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-slate-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0">
+            <a href="#" class="text-white flex items-center space-x-2 px-4">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.977l-.115.06m-2.299 3.854a6.959 6.959 0 01-4.507-2.305 6.959 6.959 0 01-2.305-4.507 6.959 6.959 0 012.305-4.507 6.959 6.959 0 014.507-2.305 6.959 6.959 0 014.507 2.305 6.959 6.959 0 012.305 4.507m-2.305 4.507l.114.06a6 6 0 003.86-.977l2.387-.477a2 2 0 011.022.547M12 18a6 6 0 100-12 6 6 0 000 12z" /></svg>
+                <span class="text-2xl font-extrabold">PepsiCo Taller</span>
+            </a>
+            <nav id="sidebar-nav"></nav>
+        </aside>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center p-4 bg-white border-b-2 border-gray-200">
+                <div class="flex items-center">
+                    <button id="menu-button" class="text-gray-500 focus:outline-none md:hidden">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+                    <h1 id="view-title" class="text-2xl font-bold text-gray-800 ml-4">Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                     <span id="user-role-display" class="text-gray-600"></span>
+                     <button onclick="logout()" class="text-sm text-gray-500 hover:text-red-600">Salir</button>
+                </div>
+            </header>
+            
+            <main id="main-content" class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6"></main>
+        </div>
+    </div>
+
+    <!-- Modals (can be added here as needed) -->
+
+<script>
+    // --- Mock Data ---
+    const mockData = {
+        // Data for Jefe de Taller, Mecánico, etc.
+    };
+
+    // --- Role Definitions ---
+    const rolesConfig = {
+        'jefe-taller': {
+            name: 'Jefe de Taller',
+            views: [
+                { id: 'dashboard', title: 'Dashboard', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>' },
+                { id: 'vehicles', title: 'Vehículos en Taller', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>' },
+                { id: 'mechanics', title: 'Supervisión Mecánicos', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>' },
+                { id: 'stock', title: 'Control de Stock', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>' },
+                { id: 'reports', title: 'Reportes', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>' }
+            ],
+        },
+        'mecanico': {
+            name: 'Mecánico de Flota',
+            views: [
+                { id: 'my-tasks', title: 'Mis Tareas', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>' },
+                { id: 'request-form', title: 'Solicitar Requerimiento', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>' }
+            ],
+        },
+        'guardia': {
+            name: 'Guardia de Acceso',
+            views: [
+                { id: 'access-control', title: 'Control de Acceso', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>' }
+            ],
+        },
+        'recepcionista': {
+            name: 'Recepcionista',
+            views: [
+                { id: 'reception', title: 'Recepción Vehículos', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>' }
+            ],
+        },
+        'asistente-repuestos': {
+            name: 'Asistente de Repuestos',
+            views: [
+                { id: 'stock-management', title: 'Gestión Inventario', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>' }
+            ],
+        },
+        'coordinador-zona': {
+            name: 'Coordinador de Zona',
+             views: [
+                { id: 'zonal-dashboard', title: 'Dashboard Zonal', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0l-6 3" /></svg>' },
+                { id: 'fleet-supervision', title: 'Supervisión de Flota', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 20.944A12.02 12.02 0 0012 21a12.02 12.02 0 009-12.056z" /></svg>' },
+                { id: 'zonal-reports', title: 'Reportes de Zona', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>' }
+            ],
+        },
+        'encargado-llaves': {
+            name: 'Encargado de Llaves',
+            views: [
+                { id: 'key-management', title: 'Gestión de Llaves', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7h1a2 2 0 012 2v5a2 2 0 01-2 2h-1m-6 4H8a2 2 0 01-2-2v-5a2 2 0 012-2h1M9 12a3 3 0 100-6 3 3 0 000 6z" /></svg>' }
+            ],
+        },
+        'admin': {
+            name: 'Administrador',
+            views: [
+                { id: 'user-management', title: 'Gestión de Usuarios', icon: '<svg class="h-5 w-5 mr-3 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2" /></svg>' }
+            ],
+        }
+    };
+
+    // --- Authentication & Routing ---
+    let currentUserRole = null;
+
+    function login() {
+        const role = document.getElementById('role-selector').value;
+        currentUserRole = role;
+        
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('app-view').classList.remove('hidden');
+        document.getElementById('app-view').classList.add('flex');
+        
+        setupUIForRole(role);
+    }
+    
+    function logout() {
+        currentUserRole = null;
+        document.getElementById('app-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('flex');
+        document.getElementById('login-view').style.display = 'flex';
+    }
+
+    function setupUIForRole(role) {
+        const config = rolesConfig[role];
+        if (!config) return;
+
+        // Setup Header
+        document.getElementById('user-role-display').textContent = `Rol: ${config.name}`;
+
+        // Setup Sidebar
+        const nav = document.getElementById('sidebar-nav');
+        nav.innerHTML = '';
+        config.views.forEach((view, index) => {
+            const isActive = index === 0 ? 'bg-blue-600' : 'hover:bg-slate-700';
+            const link = document.createElement('a');
+            link.href = '#';
+            link.className = `nav-item block py-2.5 px-4 rounded transition duration-200 ${isActive}`;
+            link.innerHTML = `${view.icon} ${view.title}`;
+            link.onclick = () => showView(role, view.id);
+            nav.appendChild(link);
+        });
+
+        // Setup Main Content
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = ''; // Clear previous content
+        config.views.forEach(view => {
+            const viewContainer = document.createElement('div');
+            viewContainer.id = view.id;
+            viewContainer.className = 'view';
+            viewContainer.innerHTML = getViewContent(view.id);
+            mainContent.appendChild(viewContainer);
+        });
+
+        // Show the first view by default
+        showView(role, config.views[0].id);
+    }
+    
+    function showView(role, viewId) {
+        const mainContent = document.getElementById('main-content');
+        // Hide all views for the current role
+        mainContent.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        // Show the selected view
+        mainContent.querySelector(`#${viewId}`).classList.add('active');
+
+        // Update active nav item
+        const nav = document.getElementById('sidebar-nav');
+        nav.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('bg-blue-600');
+            item.classList.add('hover:bg-slate-700');
+        });
+        const activeItem = Array.from(nav.querySelectorAll('.nav-item')).find(item => item.textContent.trim() === rolesConfig[role].views.find(v => v.id === viewId).title);
+        if(activeItem) {
+            activeItem.classList.add('bg-blue-600');
+            activeItem.classList.remove('hover:bg-slate-700');
+        }
+
+        // Update header title
+        document.getElementById('view-title').textContent = rolesConfig[role].views.find(v => v.id === viewId).title;
+    }
+
+
+    // --- View Content Generation ---
+    function getViewContent(viewId) {
+        switch(viewId) {
+            case 'dashboard': // Jefe de Taller Dashboard
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white rounded-lg p-5 shadow-sm">
+                            <div class="text-sm text-gray-500">Vehículos en Taller</div><div class="text-3xl font-bold text-gray-800">14</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-5 shadow-sm">
+                            <div class="text-sm text-gray-500">Tareas en Progreso</div><div class="text-3xl font-bold text-gray-800">8</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-5 shadow-sm">
+                            <div class="text-sm text-gray-500">Mecánicos Disponibles</div><div class="text-3xl font-bold text-gray-800">1 / 5</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-5 shadow-sm">
+                            <div class="text-sm text-gray-500">Repuestos Críticos</div><div class="text-3xl font-bold text-red-500">3</div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Vehículos con Alta Prioridad</h3>
+                        <!-- Table content here -->
+                    </div>
+                `;
+            case 'my-tasks': // Mecánico View
+                return `
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Mis Tareas Asignadas</h3>
+                        <div class="space-y-4">
+                            <div class="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-center"><div><p class="font-bold text-gray-800">Patente: PPDD-21 <span class="text-sm text-gray-500 font-normal">- Mercedes-Benz Actros</span></p><p class="text-sm text-gray-600">Tarea: Diagnóstico de falla de motor.</p></div><div><span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Urgente</span></div></div><div class="mt-4 flex justify-end"><button class="text-blue-600 hover:underline">Ver y Actualizar Tarea</button></div>
+                            </div>
+                            <div class="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                                <div class="flex justify-between items-center"><div><p class="font-bold text-gray-800">Patente: FFGH-45 <span class="text-sm text-gray-500 font-normal">- Scania R450</span></p><p class="text-sm text-gray-600">Tarea: Mantenimiento preventivo 100.000km.</p></div><div><span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Prioridad Media</span></div></div><div class="mt-4 flex justify-end"><button class="text-blue-600 hover:underline">Ver y Actualizar Tarea</button></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            case 'request-form': // Mecánico - Formulario de solicitud
+                return `
+                    <div class="bg-white p-6 rounded-lg shadow-sm max-w-2xl mx-auto">
+                         <h3 class="text-lg font-semibold text-gray-700 mb-4">Formulario de Solicitud de Requerimiento</h3>
+                         <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Tipo de Solicitud</label>
+                                <select class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                                    <option>Reparación (Solicitud de repuesto)</option>
+                                    <option>Mantención (Insumos)</option>
+                                    <option>Asistencia (Apoyo de otro mecánico)</option>
+                                    <option>Otro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Patente del Vehículo Asociado</label>
+                                <input type="text" placeholder="PPDD-21" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Descripción detallada del requerimiento</label>
+                                <textarea rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" placeholder="Ej: Se necesita filtro de aceite XG-500 y 5 litros de aceite 15W-40."></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Enviar Solicitud</button>
+                            </div>
+                         </div>
+                    </div>
+                `;
+             case 'access-control': // Guardia View
+                return `
+                    <div class="max-w-md mx-auto">
+                         <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                             <h3 class="text-lg font-semibold text-gray-700 mb-4">Verificar Vehículo</h3>
+                              <label class="block text-sm font-medium text-gray-700">Ingresar Patente</label>
+                             <input id="gate-plate-input" type="text" placeholder="PPDD-21 o ZXCV-12" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                             <button onclick="verifyVehicle()" class="mt-4 w-full bg-slate-600 text-white py-2 rounded-lg hover:bg-slate-700">Verificar Estado</button>
+                             <div id="gate-result" class="mt-4"></div>
+                         </div>
+                         <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Registrar Novedad</h3>
+                            <textarea rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" placeholder="Describir novedad o incidente..."></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mt-4">Adjuntar Foto</label>
+                            <input type="file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                            <button class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Registrar</button>
+                         </div>
+                    </div>
+                `;
+            case 'reception': // Recepcionista view
+                return `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Registro de Ingreso y Gestión de OT</h3>
+                            <div class="space-y-4">
+                                <div><label class="block text-sm font-medium">Patente</label><input type="text" placeholder="PPDD-21" class="mt-1 w-full rounded-md border-gray-300 p-2"></div>
+                                <div><label class="block text-sm font-medium">Motivo de Ingreso</label><textarea rows="3" class="mt-1 w-full rounded-md border-gray-300 p-2"></textarea></div>
+                                <div>
+                                    <label class="block text-sm font-medium">Validación Documentación Técnica</label>
+                                    <div class="mt-2 space-y-2">
+                                        <label class="flex items-center"><input type="checkbox" class="rounded"> <span class="ml-2">Permiso de circulación</span></label>
+                                        <label class="flex items-center"><input type="checkbox" class="rounded"> <span class="ml-2">Revisión técnica</span></label>
+                                    </div>
+                                </div>
+                                <div><label class="block text-sm font-medium">Toma de Imágenes</label><input type="file" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/></div>
+                                <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Crear OT y Registrar Ingreso</button>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Comunicación con Flota y Proveedores</h3>
+                            <div class="border rounded-lg p-3 h-64 overflow-y-auto bg-gray-50 text-sm space-y-2">
+                                <p><b>[10:30] Flota:</b> Se necesita presupuesto para cambio de parabrisas PPDD-21.</p>
+                                <p><b>[10:35] Usted:</b> Enviando solicitud a proveedor "Parabrisas Express".</p>
+                            </div>
+                             <div class="mt-4 flex"><input type="text" placeholder="Escribir mensaje..." class="flex-grow rounded-l-md border-gray-300 p-2"><button class="bg-slate-600 text-white px-4 rounded-r-md">Enviar</button></div>
+                        </div>
+                    </div>
+                `;
+             case 'stock-management': // Asistente de Repuestos view
+                return `
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                         <h3 class="text-lg font-semibold text-gray-700 mb-4">Gestión de Inventario de Repuestos</h3>
+                        <div class="overflow-x-auto">
+                           <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">SKU</th><th class="px-6 py-3">Repuesto</th><th class="px-6 py-3">Cantidad</th><th class="px-6 py-3">Estado</th><th class="px-6 py-3">Acciones</th></tr></thead>
+                                <tbody>
+                                    <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4">REP-00123</td><td class="px-6 py-4 font-medium">Filtro de Aceite XG-500</td><td class="px-6 py-4">25</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Disponible</span></td><td class="px-6 py-4 space-x-2"><button class="text-sm bg-green-500 text-white px-2 py-1 rounded">Ingreso</button><button class="text-sm bg-yellow-500 text-white px-2 py-1 rounded">Salida</button></td></tr>
+                                    <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4">REP-00789</td><td class="px-6 py-4 font-medium">Batería 12V 900A</td><td class="px-6 py-4 font-bold text-red-600">2</td><td class="px-6 py-4"><span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Stock Crítico</span></td><td class="px-6 py-4 space-x-2"><button class="text-sm bg-green-500 text-white px-2 py-1 rounded">Ingreso</button><button class="text-sm bg-yellow-500 text-white px-2 py-1 rounded">Salida</button></td></tr>
+                                </tbody>
+                           </table>
+                        </div>
+                    </div>
+                `;
+            case 'fleet-supervision': // Coordinador de Zona view
+                return `
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Supervisión de Flota - Zona Norte</h3>
+                        <div class="overflow-x-auto">
+                           <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Patente</th><th class="px-6 py-3">Conductor</th><th class="px-6 py-3">Política de Uso</th><th class="px-6 py-3">Incidentes Recientes</th><th class="px-6 py-3">Acciones</th></tr></thead>
+                                <tbody>
+                                    <tr class="bg-white border-b"><td class="px-6 py-4">ABCD-01</td><td class="px-6 py-4">Juan Pérez</td><td class="px-6 py-4"><span class="text-green-600">Cumpliendo</span></td><td class="px-6 py-4">Ninguno</td><td class="px-6 py-4"><a href="#" class="font-medium text-blue-600 hover:underline">Ver Historial</a></td></tr>
+                                    <tr class="bg-white border-b"><td class="px-6 py-4">EFGH-02</td><td class="px-6 py-4">María López</td><td class="px-6 py-4"><span class="text-yellow-600">Advertencia</span></td><td class="px-6 py-4">Exceso de velocidad (01/10)</td><td class="px-6 py-4"><a href="#" class="font-medium text-blue-600 hover:underline">Ver Historial</a></td></tr>
+                                </tbody>
+                           </table>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-semibold text-gray-700 mb-2">Coordinación con Jefe de Flota</h4>
+                            <textarea placeholder="Reporte de siniestro o coordinación..." rows="3" class="w-full rounded-md border-gray-300 p-2"></textarea>
+                            <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Enviar Reporte</button>
+                        </div>
+                    </div>
+                `;
+            case 'key-management': // Encargado de Llaves view
+                return `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Control de Llaves por Patente</h3>
+                             <div class="overflow-x-auto">
+                               <table class="w-full text-sm text-left text-gray-500">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Patente</th><th class="px-6 py-3">Estado</th><th class="px-6 py-3">Responsable/Ubicación</th><th class="px-6 py-3">Fecha Préstamo</th></tr></thead>
+                                    <tbody>
+                                        <tr class="bg-white border-b"><td class="px-6 py-4 font-medium">PPDD-21</td><td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">En Taller</span></td><td class="px-6 py-4">Taller - Carlos Vera</td><td class="px-6 py-4">05/10/2025</td></tr>
+                                        <tr class="bg-white border-b"><td class="px-6 py-4 font-medium">ABCD-01</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Guardada</span></td><td class="px-6 py-4">Llavero A-1</td><td class="px-6 py-4">N/A</td></tr>
+                                    </tbody>
+                               </table>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                             <h3 class="text-lg font-semibold text-gray-700 mb-4">Registrar Préstamo</h3>
+                             <div class="space-y-3">
+                                <div><label class="block text-sm font-medium">Patente</label><input type="text" class="mt-1 w-full rounded-md border-gray-300 p-2"></div>
+                                <div><label class="block text-sm font-medium">Retirado por</label><input type="text" placeholder="Nombre del conductor/mecánico" class="mt-1 w-full rounded-md border-gray-300 p-2"></div>
+                                <button class="w-full bg-blue-600 text-white py-2 rounded-lg">Registrar Salida de Llave</button>
+                             </div>
+                              <hr class="my-4">
+                             <h3 class="text-lg font-semibold text-gray-700 mb-4">Inventario de Duplicados</h3>
+                             <p class="text-sm">Duplicados disponibles: <b>12</b></p>
+                             <p class="text-sm">Chapas de repuesto: <b>5</b></p>
+                        </div>
+                    </div>
+                `;
+            case 'user-management': // Admin View
+                 return `
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-lg font-semibold text-gray-700">Gestión de Cuentas de Usuario</h3><button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Crear Nuevo Usuario</button></div>
+                        <div class="overflow-x-auto">
+                           <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Nombre</th><th class="px-6 py-3">Email</th><th class="px-6 py-3">Rol</th><th class="px-6 py-3">Estado</th><th class="px-6 py-3">Acciones</th></tr></thead>
+                                <tbody>
+                                    <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium text-gray-900">Carlos Vera</td><td class="px-6 py-4">cvera@pepsico.com</td><td class="px-6 py-4">Mecánico</td><td class="px-6 py-4"><span class="text-green-600">Activo</span></td><td class="px-6 py-4 space-x-2"><a href="#" class="font-medium text-blue-600 hover:underline">Editar</a><a href="#" class="font-medium text-red-600 hover:underline">Desactivar</a></td></tr>
+                                </tbody>
+                           </table>
+                        </div>
+                    </div>
+                `;
+            // Add other cases for each viewId...
+            default:
+                return `<div class="bg-white p-6 rounded-lg shadow-sm">Contenido para la vista: ${viewId}</div>`;
+        }
+    }
+    
+    function verifyVehicle() {
+        const plateInput = document.getElementById('gate-plate-input');
+        const resultDiv = document.getElementById('gate-result');
+        if (!plateInput || !resultDiv) return;
+        
+        const plate = plateInput.value.toUpperCase();
+        
+        if (plate === 'PPDD-21') {
+            resultDiv.innerHTML = '<div class="p-4 bg-green-50 text-green-800 rounded-lg text-center">Patente PPDD-21: **AUTORIZADO PARA INGRESAR**</div>';
+        } else if (plate === 'ZXCV-12') {
+            resultDiv.innerHTML = '<div class="p-4 bg-blue-50 text-blue-800 rounded-lg text-center">Patente ZXCV-12: **AUTORIZADO PARA SALIR**</div>';
+        } else {
+            resultDiv.innerHTML = '<div class="p-4 bg-red-50 text-red-800 rounded-lg text-center">Patente ' + plate + ': **NO AUTORIZADO**</div>';
+        }
+    }
+
+    // --- UI Interactivity ---
+    const sidebar = document.getElementById('sidebar');
+    const menuButton = document.getElementById('menu-button');
+    menuButton.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
+
+</script>
+</body>
+</html>
+
